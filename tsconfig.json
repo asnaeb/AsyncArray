@@ -4,7 +4,9 @@
         "module": "CommonJS",
         "moduleResolution": "Node16",
         "declaration": true,
-        "outDir": "."
+        "outDir": ".",
+        "strict": true,
+        "noImplicitOverride": true
     },
     "include": ["src"],
     "exclude": ["tests"]
