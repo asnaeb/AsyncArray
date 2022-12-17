@@ -21,6 +21,7 @@
     "non",
     "blocking"
   ],
+  "repository": "https://github.com/asnaeb/async-array",
   "author": "asnaeb",
   "license": "MIT",
   "devDependencies": {
