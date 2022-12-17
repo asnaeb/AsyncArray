@@ -1,9 +1,5 @@
-export class AsyncArray<T> {
+class AsyncArrayConstructor<T> {
     [i: number]: T
-
-    public static from<T>(array: T[]) {
-        return new AsyncArray(array)
-    }
 
     readonly #array: T[]
 
@@ -19,7 +15,7 @@ export class AsyncArray<T> {
         this.#array.length = length
     }
 
-    public constructor(array: T[] = []) {
+    public constructor(array: T[]) {
         this.#array = array
 
         return new Proxy(this, {
@@ -65,10 +61,10 @@ export class AsyncArray<T> {
         const length = this.length
         const map: M[] = []
 
-        return new Promise<AsyncArray<M>>(resolve => {
+        return new Promise<AsyncArrayConstructor<M>>(resolve => {
             const iterate = async (i = 0): Promise<void> => {
                 if (i === length)
-                    return resolve(new AsyncArray(map))
+                    return resolve(new AsyncArrayConstructor(map))
     
                 const mapped = await callback(this.#array[i], i, this.#array)
                 map.push(mapped)
@@ -78,5 +74,15 @@ export class AsyncArray<T> {
     
             iterate()
         })
+    }
+}
+
+export class AsyncArray<T> extends AsyncArrayConstructor<T> {
+    public static from<T>(array: T[]) {
+        return new AsyncArrayConstructor(array)
+    }
+
+    constructor() {
+        super([])
     }
 }

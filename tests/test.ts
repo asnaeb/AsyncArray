@@ -25,8 +25,6 @@ const server = new Server(async (req, res) => {
 //server.listen(3000, () => console.log('listening..'))
 
 const a = new AsyncArray()
-a[0] = 'hello'
-a.sync.push(1, 2, 3, 4)
-console.log(a[2])
+a[0] = 7
 console.log(a.sync)
 console.log(a)
