@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "build-tests": "tsc --project ./tests/tsconfig.json",
     "pretest": "npm run build",
     "test": "ts-node-esm --cwd tests --project tsconfig.json --"
   },
@@ -23,7 +24,7 @@
   ],
   "repository": "https://github.com/asnaeb/async-array",
   "author": "asnaeb",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "devDependencies": {
     "@types/node": "^18.11.16",
     "ts-node": "^10.9.1",

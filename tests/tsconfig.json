@@ -2,7 +2,9 @@
     "extends": "../tsconfig.json",
     "compilerOptions": {
         "module": "Node16",
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "outDir": ".",
+        "declaration": false
     },
     "include": ["/**/*"],
     "exclude": []

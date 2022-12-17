@@ -1,17 +1,23 @@
-export class AsyncArray<T> extends Array<T> {
-    public static override from<T>(element: Iterable<T> | ArrayLike<T>) {
-        const array = super.from(element)
+export class AsyncArray<T> {
+    readonly #array: T[]
+    readonly #length: number
 
-        return new this(...array)
+    public get array() {
+        return this.#array
     }
 
-    #async_foreach(callback: (item: T, index: number, array: T[]) => any) {
+    constructor(array: T[]) {
+        this.#array = array
+        this.#length = array.length
+    }
+
+    public foreach(callback: (item: T, index: number, array: T[]) => any) {
         return new Promise<void>(resolve => {
             const iterate = async (i = 0) => {
-                if (i === this.length)
+                if (i === this.#length)
                     return resolve()
     
-                await callback(this[i], i, this)
+                await callback(this.#array[i], i, this.#array)
     
                 setImmediate(iterate, ++i)
             }
@@ -20,15 +26,15 @@ export class AsyncArray<T> extends Array<T> {
         })
     }
 
-    #async_map<M>(callback: (item: T, index: number, array: T[]) => M) {
-        const map = new AsyncArray<M>()
+    public map<M>(callback: (item: T, index: number, array: T[]) => M) {
+        const map: M[] = []
 
         return new Promise<AsyncArray<M>>(resolve => {
-            const iterate = async (i = 0) => {
-                if (i === this.length)
-                    return resolve(map)
+            const iterate = async (i = 0): Promise<void> => {
+                if (i === this.#length)
+                    return resolve(new AsyncArray(map))
     
-                const mapped = await callback(this[i], i, this)
+                const mapped = await callback(this.#array[i], i, this.#array)
                 map.push(mapped)
     
                 setImmediate(iterate, ++i)
@@ -36,12 +42,5 @@ export class AsyncArray<T> extends Array<T> {
     
             iterate()
         })
-    }
-
-    public get async() {
-        return {
-            forEach: this.#async_foreach.bind(this),
-            map: this.#async_map.bind(this)
-        }
     }
 }

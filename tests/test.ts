@@ -1,9 +1,13 @@
 import assert from 'node:assert'
 import {AsyncArray} from '../index.js'
 
-const arr = AsyncArray.from([10, 20, 30, 40, 50])
+console.time('create')
+const arr = Array(5).fill(0).map((e, i) => ({e, i, greeting: 'hello', date: new Date().toISOString()}))
 
-const res = await arr.async.map(o => o * 100)
+console.timeEnd('create')
+
+console.time('clone')
+await new AsyncArray(arr).foreach(i => console.log(i))
+console.timeEnd('clone')
 
 //assert.deepStrictEqual(res, [1000, 2000, 3000, 4000, 5000])
-console.log(res)
