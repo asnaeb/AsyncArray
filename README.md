@@ -1,6 +1,6 @@
 # AsyncArray
 Array class with non-blocking methods and async/await support.
-It provides the same functionality as native Arraya, using `setImmediate` on each iteration. The event loop won't be stuck until
+It provides the same functionality as native Arrays, using `setImmediate` on each iteration. The event loop won't be stuck until
 the end of the full array computation with these methods but this comes at the cost of speed
 so use it when speed is not a priority and **not blocking** the event loop **is**.
 ### Installation
