@@ -1,17 +1,21 @@
 export class AsyncArray<T> {
+    public static from<T>(array: T[]) {
+        return new AsyncArray(array)
+    }
+
     readonly #array: T[]
     readonly #length: number
 
-    public get array() {
+    public get sync() {
         return this.#array
     }
 
-    constructor(array: T[]) {
+    public constructor(array: T[] = []) {
         this.#array = array
         this.#length = array.length
     }
 
-    public foreach(callback: (item: T, index: number, array: T[]) => any) {
+    public forEach(callback: (item: T, index: number, array: T[]) => any) {
         return new Promise<void>(resolve => {
             const iterate = async (i = 0) => {
                 if (i === this.#length)
