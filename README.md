@@ -22,10 +22,23 @@ async.sync.push(1, 2, 3)
 ```javascript
 await async.forEach(item => /* .. */)
 ```
+Async callbacks are allowed
+```javascript
+// Will log every second
+await async.forEach(async item => {
+    await new Promise(resolve => {
+        setTimeout(() => resolve(console.log(item)), 1000)
+    })
+})
+```
 #### map
 ```javascript
 const mapped = await async.map(item => /* .. */)
 mapped instanceof AsyncArray // true
+```
+Async callback example
+```javascript
+const items = await dbKeys.map(async key => await db.get(key))
 ```
 
 ### Info
