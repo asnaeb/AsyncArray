@@ -17,6 +17,10 @@ const async = AsyncArray.from(array)
 // Or be constructed (Standard methods under sync property)
 const async = new AsyncArray()
 async.sync.push(1, 2, 3)
+
+// Items can be set and accessed with array notation
+async[3] = 4
+async[3] // --> 4
 ````
 #### forEach
 ```javascript
