@@ -1,7 +1,7 @@
 import {Server} from 'node:http'
 import {AsyncArray} from '../index.js'
 
-const arr = new Array(1e6).fill(0).map((e, i) => ({e, i, greeting: 'hello'}))
+const arr = new Array(2e5).fill(0).map((e, i) => ({e, i, greeting: 'hello'}))
 
 const server = new Server(async (req, res) => {
     if (req.url?.startsWith('/async')) {
@@ -22,9 +22,4 @@ const server = new Server(async (req, res) => {
     }
 })
 
-//server.listen(3000, () => console.log('listening..'))
-
-const a = new AsyncArray()
-a[0] = 7
-console.log(a.sync)
-console.log(a)
+server.listen(3000, () => console.log('listening..'))

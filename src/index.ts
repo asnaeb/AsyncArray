@@ -1,27 +1,35 @@
+const wm = new WeakMap<AsyncArrayConstructor<any>, any[]>()
+
 class AsyncArrayConstructor<T> {
     [i: number]: T
 
-    readonly #array: T[]
-
     public get sync() {
-        return this.#array
+        const prototype: any = {}
+
+        for (const k of Object.getOwnPropertyNames(Array.prototype)) {
+            const v = Array.prototype[<any>k]
+            
+            if (typeof v === 'function' && k !== 'constructor')
+                prototype[k] = v.bind(wm.get(this))
+        }
+
+        return Object.freeze(prototype) as ArrayConstructor['prototype']
     }
 
-    public get length() {
-        return this.#array.length
+    public get length(): number {
+        return wm.get(this)!.length
     }
 
     public set length(length) {
-        this.#array.length = length
+        wm.get(this)!.length = length
     }
 
     public constructor(array: T[]) {
-        this.#array = array
-
-        return new Proxy(this, {
+        const proxy = new Proxy(this, {
             get(target, p) {
                 if (typeof p === 'string') {
                     const int = +p
+                    
                     if (Number.isInteger(int))
                         return array[int]
                 }
@@ -31,6 +39,7 @@ class AsyncArrayConstructor<T> {
             set(target, p, newValue) {
                 if (typeof p === 'string') {
                     const int = +p
+
                     if (Number.isInteger(int))
                         return array[int] = newValue
                 }
@@ -38,17 +47,23 @@ class AsyncArrayConstructor<T> {
                 return Reflect.set(target, p, newValue)
             }
         })
+        
+        wm.set(this, array)
+        wm.set(proxy, array)
+
+        return proxy
     }
 
     public forEach(callback: (item: T, index: number, array: T[]) => any) {
-        const length = this.length
+        const array = wm.get(this)!
+        const length = array.length
 
         return new Promise<void>(resolve => {
             const iterate = async (i = 0) => {
                 if (i === length)
                     return resolve()
     
-                await callback(this.#array[i], i, this.#array)
+                await callback(array[i], i, array)
     
                 setImmediate(iterate, ++i)
             }
@@ -58,7 +73,8 @@ class AsyncArrayConstructor<T> {
     }
 
     public map<M>(callback: (item: T, index: number, array: T[]) => M) {
-        const length = this.length
+        const array = wm.get(this)!
+        const length = array.length
         const map: M[] = []
 
         return new Promise<AsyncArrayConstructor<M>>(resolve => {
@@ -66,7 +82,7 @@ class AsyncArrayConstructor<T> {
                 if (i === length)
                     return resolve(new AsyncArrayConstructor(map))
     
-                const mapped = await callback(this.#array[i], i, this.#array)
+                const mapped = await callback(array[i], i, array)
                 map.push(mapped)
     
                 setImmediate(iterate, ++i)
