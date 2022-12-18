@@ -14,11 +14,10 @@ class AsyncArrayConstructor<T> implements ArrayLike<T> {
 
         function stringify(value: any) {
             function replacer(key: string, value: unknown) {
-                switch (typeof value) {
-                    case 'string':
-                        return `'${value}'`
-                    default: return value
-                }
+                if (typeof value === 'string')
+                    return `'${value}'` 
+                
+                return value
             }
 
             return JSON.stringify(value, replacer)
