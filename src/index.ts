@@ -13,7 +13,9 @@ class AsyncArrayConstructor<T> {
                 prototype[k] = v.bind(wm.get(this))
         }
 
-        return Object.freeze(prototype) as ArrayConstructor['prototype']
+        return Object.freeze(prototype) as {
+            [K in keyof T[] as K extends (number | symbol | 'length') ? never : K]: T[][K]
+        }
     }
 
     public get length(): number {
