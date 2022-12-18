@@ -22,4 +22,12 @@ const server = new Server(async (req, res) => {
     }
 })
 
-server.listen(3000, () => console.log('listening..'))
+//server.listen(3000, () => console.log('listening..'))
+
+const as = AsyncArray.from(['a', 'b', 'c', {a: 0}])
+as.sync.push('d', 'e', 'f')
+
+console.log(as)
+console.log(as.toArray())
+
+as.forEach(async i => await new Promise(r => setTimeout(() => r(console.log(i)), 100)))

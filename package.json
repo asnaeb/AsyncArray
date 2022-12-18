@@ -22,7 +22,7 @@
     "non",
     "blocking"
   ],
-  "repository": "https://github.com/asnaeb/async-array",
+  "repository": "https://github.com/asnaeb/AsyncArray",
   "author": "asnaeb",
   "license": "GPL-3.0",
   "devDependencies": {

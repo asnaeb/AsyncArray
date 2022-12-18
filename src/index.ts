@@ -1,36 +1,90 @@
+import {InspectOptions, inspect} from 'util'
+
 const wm = new WeakMap<AsyncArrayConstructor<any>, any[]>()
 
-class AsyncArrayConstructor<T> {
+type ArrayPrototype<T> = {
+    [K in keyof T[] as (T[])[K] extends Function ? K : never]: (T[])[K] 
+}
+
+class AsyncArrayConstructor<T> implements ArrayLike<T> {
     [i: number]: T
 
+    public [inspect.custom]() {
+        const array = this.toArray()
+
+        function stringify(value: any) {
+            function replacer(key: string, value: unknown) {
+                switch (typeof value) {
+                    case 'string':
+                        return `'${value}'`
+                    default: return value
+                }
+            }
+
+            return JSON.stringify(value, replacer)
+                .replace(/"/g, '')
+                .replace(/,/g, ', ')
+                .replace(/:/g, ': ')
+                .replace(/\[/g, '[ ')
+                .replace(/\]/g, ' ]')
+                .replace(/\{/g, '{ ')
+                .replace(/\}/g, ' }')
+        }
+
+        return `AsyncArray (${array.length}) ` + stringify(this.toArray())
+    }
+
+    public *[Symbol.iterator]() {
+        const array: T[] = this.toArray()
+
+        for (let i = 0; i < array.length; i++) {
+            yield array[i]
+        }
+    }
+
+    public get [Symbol.toStringTag]() {
+        return 'AsyncArray'
+    }
+
     public get sync() {
-        const prototype: any = {}
-
+        const array: T[] = this.toArray()
+        const prototype = {}
+        
         for (const k of Object.getOwnPropertyNames(Array.prototype)) {
-            const v = Array.prototype[<any>k]
-            
-            if (typeof v === 'function' && k !== 'constructor')
-                prototype[k] = v.bind(wm.get(this))
+            switch (k) {
+                case 'constructor':
+                case 'toLocaleString':
+                case 'toString':
+                case 'length':
+                    break
+                default: {
+                    const method = Array.prototype[<any>k]
+                    Object.assign(prototype,  {[k]: method.bind(array)})
+                    break
+                }
+            }
         }
 
-        return Object.freeze(prototype) as {
-            [K in keyof T[] as K extends (number | symbol | 'length') ? never : K]: T[][K]
-        }
+        return prototype as ArrayPrototype<T>
     }
 
     public get length(): number {
-        return wm.get(this)!.length
+        const array: T[] = wm.get(this)!
+
+        return array.length
     }
 
-    public set length(length) {
-        wm.get(this)!.length = length
+    public set length(newLength) {
+        const array: T[] = wm.get(this)!
+
+        array.length = newLength
     }
 
     public constructor(array: T[]) {
         const proxy = new Proxy(this, {
             get(target, p) {
                 if (typeof p === 'string') {
-                    const int = +p
+                    const int: number = +p
                     
                     if (Number.isInteger(int))
                         return array[int]
@@ -42,7 +96,7 @@ class AsyncArrayConstructor<T> {
                 if (typeof p === 'string') {
                     const int: number = +p
 
-                    if (Number.isInteger(int))
+                    if (Number.isInteger(int)) 
                         return array[int] = newValue
                 }
 
@@ -56,8 +110,12 @@ class AsyncArrayConstructor<T> {
         return proxy
     }
 
+    public toArray(): T[] {
+        return wm.get(this)!
+    }
+
     public forEach(callback: (item: T, index: number, array: T[]) => any) {
-        const array = wm.get(this)!
+        const array = this.toArray()
         const length = array.length
 
         return new Promise<void>(resolve => {
@@ -75,7 +133,7 @@ class AsyncArrayConstructor<T> {
     }
 
     public map<M>(callback: (item: T, index: number, array: T[]) => M) {
-        const array = wm.get(this)!
+        const array = this.toArray()
         const length = array.length
         const map: M[] = []
 
