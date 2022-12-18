@@ -29,4 +29,4 @@ type PrimaryKeyObject = Record<string | number, string | string[]> | Record<stri
 export type PrimaryKeys<T> = T[] | [PrimaryKeyObject] | string[] | number[]
 
 const a: PrimaryKeys<{a: 0}> = []
-const b = AsyncArray.from(a)
+const b = AsyncArray.from(a).map(i => i)

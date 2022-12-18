@@ -97,7 +97,7 @@ class AsyncArrayConstructor<T> {
 
 export class AsyncArray<T> extends AsyncArrayConstructor<T> {
     public static from<U extends any[]>(array: U) {
-        return new AsyncArrayConstructor<U>(array)
+        return new AsyncArrayConstructor<U extends (infer I)[] ? I : never>(array)
     }
 
     constructor() {
