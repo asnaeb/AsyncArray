@@ -40,7 +40,7 @@ class AsyncArrayConstructor<T> {
             },
             set(target, p, newValue) {
                 if (typeof p === 'string') {
-                    const int = +p
+                    const int: number = +p
 
                     if (Number.isInteger(int))
                         return array[int] = newValue
@@ -96,8 +96,8 @@ class AsyncArrayConstructor<T> {
 }
 
 export class AsyncArray<T> extends AsyncArrayConstructor<T> {
-    public static from<T>(array: T[]) {
-        return new AsyncArrayConstructor(array)
+    public static from<U extends any[]>(array: U) {
+        return new AsyncArrayConstructor<U>(array)
     }
 
     constructor() {

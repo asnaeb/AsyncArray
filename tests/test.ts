@@ -23,3 +23,10 @@ const server = new Server(async (req, res) => {
 })
 
 server.listen(3000, () => console.log('listening..'))
+
+
+type PrimaryKeyObject = Record<string | number, string | string[]> | Record<string | number, number | number[]>
+export type PrimaryKeys<T> = T[] | [PrimaryKeyObject] | string[] | number[]
+
+const a: PrimaryKeys<{a: 0}> = []
+const b = AsyncArray.from(a)
