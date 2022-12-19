@@ -24,13 +24,5 @@ const server = new Server(async (req, res) => {
 
 //server.listen(3000, () => console.log('listening..'))
 
-console.time('sync')
-AsyncArray.from(arr).map(i => ({...i, date: 'NEVEER'}))
-console.timeEnd('sync')
-
-const {Async} = AsyncArray.from(arr)
-console.time('async')
-const mapped = await Async.map(i => ({...i, date: 'NEVEER'}))
-console.timeEnd('async')
-
-console.log(mapped)
+const as = AsyncArray.from(arr)
+console.log(as.Async)

@@ -6,7 +6,10 @@ export class AsyncArray<T> extends Array<T> {
                     return new Async(array)
 
                 return Reflect.get(target, p)
-            }
+            },
+            getPrototypeOf(target) {
+                return AsyncArray.prototype
+            },
         }) 
 
         return proxy as AsyncArray<S>
