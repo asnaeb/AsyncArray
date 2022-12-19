@@ -1,4 +1,4 @@
-import {InspectOptions, inspect} from 'util'
+import {inspect} from 'util'
 
 const wm = new WeakMap<AsyncArrayConstructor<any>, any[]>()
 
@@ -10,27 +10,7 @@ class AsyncArrayConstructor<T> implements ArrayLike<T> {
     [i: number]: T
 
     public [inspect.custom]() {
-        const array = this.toArray()
-
-        function stringify(value: any) {
-            function replacer(key: string, value: unknown) {
-                if (typeof value === 'string')
-                    return `'${value}'` 
-                
-                return value
-            }
-
-            return JSON.stringify(value, replacer)
-                .replace(/"/g, '')
-                .replace(/,/g, ', ')
-                .replace(/:/g, ': ')
-                .replace(/\[/g, '[ ')
-                .replace(/\]/g, ' ]')
-                .replace(/\{/g, '{ ')
-                .replace(/\}/g, ' }')
-        }
-
-        return `AsyncArray (${array.length}) ` + stringify(this.toArray())
+        return this.toArray()
     }
 
     public *[Symbol.iterator]() {
@@ -87,6 +67,15 @@ class AsyncArrayConstructor<T> implements ArrayLike<T> {
                     
                     if (Number.isInteger(int))
                         return array[int]
+
+                    if (!(p in target) && (p in target.sync)) {
+                        console.warn(
+                            `Property [${p}] does not exist on type AsyncArray.` 
+                            +` If you were looking for [Array.prototype.${p}]`
+                            +` you can access it under the [sync] property:`
+                            +` new AsyncArray().sync.${p}`
+                        )
+                    }
                 }
 
                 return Reflect.get(target, p)
@@ -113,16 +102,15 @@ class AsyncArrayConstructor<T> implements ArrayLike<T> {
         return wm.get(this)!
     }
 
-    public forEach(callback: (item: T, index: number, array: T[]) => any) {
-        const array = this.toArray()
-        const length = array.length
+    public forEach(callback: (item: T, index: number, array: AsyncArray<T>) => any) {
+        const length = this.length
 
         return new Promise<void>(resolve => {
             const iterate = async (i = 0) => {
                 if (i === length)
                     return resolve()
     
-                await callback(array[i], i, array)
+                await callback(this[i], i, this)
     
                 setImmediate(iterate, ++i)
             }
@@ -131,18 +119,17 @@ class AsyncArrayConstructor<T> implements ArrayLike<T> {
         })
     }
 
-    public map<M>(callback: (item: T, index: number, array: T[]) => M) {
-        const array = this.toArray()
-        const length = array.length
-        const map: M[] = []
+    public map<U>(callback: (item: T, index: number, array: AsyncArray<T>) => U) {
+        const length = this.length
+        const map = new AsyncArray<U>()
 
-        return new Promise<AsyncArrayConstructor<M>>(resolve => {
+        return new Promise<AsyncArray<U>>(resolve => {
             const iterate = async (i = 0): Promise<void> => {
                 if (i === length)
-                    return resolve(new AsyncArrayConstructor(map))
+                    return resolve(map)
     
-                const mapped = await callback(array[i], i, array)
-                map.push(mapped)
+                const mapped = await callback(this[i], i, this)
+                map.sync.push(mapped)
     
                 setImmediate(iterate, ++i)
             }
@@ -150,11 +137,41 @@ class AsyncArrayConstructor<T> implements ArrayLike<T> {
             iterate()
         })
     }
+
+    public splitToChunks(maxLength: number) {
+        const length = this.length
+
+        return new Promise<AsyncArray<AsyncArray<T>>>(resolve => {
+            const chunks: AsyncArray<AsyncArray<T>> = new AsyncArray()
+
+            if (length > maxLength) {
+                const iterate = (i = 0) => {
+                    if (i >= length)
+                        return resolve(chunks)
+    
+                    chunks.sync.push(AsyncArray.from(this.sync.slice(i, i + maxLength)))
+                    setImmediate(iterate, i + maxLength)
+                }
+    
+                iterate()
+            } 
+            
+            else {
+                chunks.sync.push(this)
+                resolve(chunks)
+            }
+        })
+    }
+    
 }
 
 export class AsyncArray<T> extends AsyncArrayConstructor<T> {
-    public static from<U extends any[]>(array: U) {
-        return new AsyncArrayConstructor<U extends (infer I)[] ? I : never>(array)
+    public static from<S extends Array<any>, U extends S extends (infer V)[] ? AsyncArray<V> : never>
+    (array: S): U {
+        if (array instanceof AsyncArrayConstructor)
+            return array as unknown as U
+            
+        return new AsyncArrayConstructor(array) as U
     }
 
     constructor() {
