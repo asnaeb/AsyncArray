@@ -2,6 +2,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run Child",
+            "request": "launch",
+            "runtimeArgs": [
+                "test",
+                "child.ts"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
             "name": "Run Test",
             "request": "launch",
             "runtimeArgs": [

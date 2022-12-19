@@ -24,10 +24,10 @@ Standard array methods will be available under the `sync` property
 ```javascript
 arr.sync.push(1, 2, 3)
 ```
-Items can be set and accessed like using standard array syntax
+Items can be set and accessed using standard array syntax
 ```javascript
 arr[3] = 4
-arr[3] // --> 4
+arr[3] // -> 4
 ```
 Iteration with `for...of` can be done as usual
 ```javascript
@@ -39,6 +39,7 @@ for (const item of arr) { /* .. */ }
     await arr.forEach(item => /* .. */)
     ```
     Async callback example
+
     ```javascript
     // Will log every second
     await arr.forEach(async item => {
@@ -52,10 +53,18 @@ for (const item of arr) { /* .. */ }
     const mapped = await arr.map(item => /* .. */)
     ```
     Async callback example
+
     ```javascript
     // Assume a database that retrieves items with keys like {id: number}
     const db = dBClient()
     const items = await arr.map(async id => await db.get({id}))
+    ```
+- ### splitToChunks
+    Splits the `AsyncArray` object into `AsyncArray`'s of the desired size
+    ```javascript
+    const whole = AsyncArray.from(Array(6).fill(0))
+    const split = await whole.splitToCunks(2)
+    chunked // -> [[0, 0], [0, 0], [0, 0]]
     ```
 
 ## Info
