@@ -12,11 +12,11 @@ export class AsyncArray<T> extends Array<T> {
     public static override from:
     <T, U = T>(iterable: ArrayLike<T> | Iterable<T>, mapfn?: (k: T, i: number) => U, thisArg?: any) => AsyncArray<U>
 
-    public static to<T>(array: ArrayLike<T>) {
+    public static to<T extends ArrayLike<any>>(array: T) {
         if (array instanceof AsyncArray)
-            return array as AsyncArray<T>
+            return array as AsyncArray<T extends (infer U)[] ? U : never>
 
-        return Object.setPrototypeOf(array, this.prototype) as AsyncArray<T>
+        return Object.setPrototypeOf(array, this.prototype) as AsyncArray<T extends (infer U)[] ? U : never>
     }
 
     public get async (): Async<T> {
