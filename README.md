@@ -1,5 +1,5 @@
 # AsyncArray
-[![npm](https://img.shields.io/badge/npm-1.5.3-blueviolet?style=flat)](https://www.npmjs.com/package/@asn.aeb/async-array)
+[![npm](https://img.shields.io/badge/npm-1.5.4-blueviolet?style=flat)](https://www.npmjs.com/package/@asn.aeb/async-array)
 ![deps](https://img.shields.io/badge/dependencies-none-brightgreen?style=flat)
 ![license](https://img.shields.io/badge/license-GPL-blue?style=flat)
 ## Arrays with async capabilities

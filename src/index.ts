@@ -1,4 +1,3 @@
-type AsyncCallback<T, R> = (element: T, index: number, array: T[]) => R | Promise<R>
 type Callback<T, R> = (element: T, index: number, array: T[]) => R 
 
 export interface AsyncArray<T> {
@@ -31,7 +30,7 @@ class Async<T> {
         this.#array = array
     }
 
-    public every(callback: AsyncCallback<T, boolean>) {
+    public every(callback: Callback<T, boolean>) {
         const array = this.#array
         const length = array.length
 
@@ -52,7 +51,7 @@ class Async<T> {
         })
     }
 
-    public filter(callback: AsyncCallback<T, boolean>) {
+    public filter(callback: Callback<T, boolean>) {
         const array = this.#array
         const length = array.length
         const filtered = new AsyncArray<T>()
@@ -92,7 +91,7 @@ class Async<T> {
         })
     }
 
-    public find(callback: AsyncCallback<T, boolean>) {
+    public find(callback: Callback<T, boolean>) {
         const array = this.#array
         const length = array.length
 
@@ -113,7 +112,7 @@ class Async<T> {
         })
     }
 
-    public findIndex(callback: AsyncCallback<T, boolean>) {
+    public findIndex(callback: Callback<T, boolean>) {
         const array = this.#array
         const length = array.length
 
@@ -134,7 +133,7 @@ class Async<T> {
         })
     }
 
-    public findLast(callback: AsyncCallback<T, boolean>) {
+    public findLast(callback: Callback<T, boolean>) {
         const array = this.#array
         const length = array.length
 
@@ -155,7 +154,7 @@ class Async<T> {
         })
     }
 
-    public findLastIndex(callback: AsyncCallback<T, boolean>) {
+    public findLastIndex(callback: Callback<T, boolean>) {
         const array = this.#array
         const length = array.length
 
@@ -176,7 +175,7 @@ class Async<T> {
         })
     }
 
-    public forEach(callback: AsyncCallback<T, any>) {
+    public forEach(callback: Callback<T, any>) {
         const array = this.#array
         const length = array.length
 
@@ -269,17 +268,31 @@ class Async<T> {
         })
     }
 
-    public map<U>(callback: AsyncCallback<T, U>) {
+    public map<S>(callback: Callback<T, S>): Promise<AsyncArray<Awaited<S>>>
+    public map
+    <
+        S, 
+        B extends boolean,
+        U extends B extends true ? AsyncArray<Awaited<S>> : AsyncArray<S>
+    >
+    (callback: Callback<T, S>, resolve: B): Promise<U>
+    public map(callback: Callback<T, unknown>, _await = true) {
         const array = this.#array    
         const length = array.length
-        const map = new AsyncArray<U>()
+        const map = new AsyncArray()
 
-        return new Promise<AsyncArray<U>>(resolve => {
+        return new Promise<AsyncArray<unknown>>(resolve => {
             const iterate = async (i = 0) => {
                 if (i === length)
                     return resolve(map)
     
-                const mapped = await callback(array[i], i, array)
+                let mapped
+
+                if (_await)
+                    mapped = await callback(array[i], i, array) 
+                else 
+                    mapped = callback(array[i], i, array) 
+
                 map.push(mapped)
     
                 setImmediate(iterate, ++i)
@@ -365,7 +378,7 @@ class Async<T> {
         })
     }
 
-    public some(callback: AsyncCallback<T, boolean>) {
+    public some(callback: Callback<T, boolean>) {
         const array = this.#array
         const length = array.length
 
