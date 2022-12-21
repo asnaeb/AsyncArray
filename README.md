@@ -19,7 +19,7 @@ npm i @asn.aeb/async-array
 import {AsyncArray} from '@asn.aeb/async-array'
 ```
 An instance of `AsyncArray` can be constructed with normal class syntax
-and its constructor shares the same signature as `Array`'s constructor.
+and its constructor shares the same signature with `Array`'s constructor.
 ```javascript
 let arr
 
@@ -48,8 +48,24 @@ Under this property, beside this library's own methods, you will find many metho
 that have the same name as `Array.prototype` methods that you know. 
 They will provide exactly the same functionality with the difference 
 that they will run asynchronously, not blocking the Node.js event loop, 
-and will return a promise. These methods, where a callback must be supplied, 
-will accept a callback that returns a promise and execute it asynchronously as well. 
+and will return a promise. Just append `await` before the method invocation or use `.then` after it and use it like you normally would. Some examples can be:
+
+```javascript
+await arr.async.filter(item => item > 5) 
+// -> AsyncArray(2) [6, 7] 
+
+await arr.async.find(item => item > 5) 
+// -> 6 
+
+await arr.async.reduce((acc, curr) => `${acc}.${curr}`) 
+// -> '1.2.3.4.5.6.7'
+
+await arr.async.some(item => item > 10) 
+// -> false
+
+await arr.async.map(item => item * 10) 
+// -> AsyncArray(6) [10, 20, 30, 40, 50, 60, 70]
+```
 
 ## `AsyncArray.prototype.async`
 - `every`
@@ -136,37 +152,65 @@ As you can see, `myArray` has not been duplicated. It has just been transformed 
 > console.log(myArray instanceof AsyncArray) // -> true
 > ```
 > While this is generally okay, it is always better to assign the transformed object
-> to a new identifier when using Typescript so that you can have the correct type on it. Otherwise, you will incurr in problems with typings.
+> to a new identifier when using Typescript so that you can have the correct type on it. Otherwise, you may incurr in problems with typings.
 
-## Usage Examples
+## Async Callbacks
+Iterating methods are passed a callback function to be executed on each item of the array they are iterating. Callbacks
+passed to `AsyncArray` methods can return a `Promise` which will be resolved before the next iteration. This allows 
+the use of async callbacks or callbacks that just return a promise which will be automatically resolved.
+### Examples
 Log an item every second
 ```javascript
 const myArray = new AsyncArray(1, 2, 3)
 
-myArray.async.forEach(async item => {
-    await new Promise(resolve => {
-        setTimeout(() => resolve(console.log(item)), 1000)
-    })
-})
+// Returned promise is automatically resolved before next iteration
+myArray.async.forEach(item => new Promise(resolve => {
+    setTimeout(() => resolve(console.log(item)), 1000)
+}))
 ```
-Query a database with key-schema `{id: number}` from an array of numbers and retrieve
-the result into a new array
+Sequentially query a database with key-schema `{id: number}` from an array of numbers and retrieve the result into a new `AsyncArray`
 ```javascript
-const db = myDbClient()
 const keys = new AsyncArray(1, 2, 3)
-const items = await arr.async.map(async id => await db.get({id}))
+
+const db = myDbClient() // <- Hypotetical database client
+
+// Assume db.get() returns a promise that resolved to the actual item
+const items = await arr.async.map(id => db.get({id}))
 ```
+> #### **Note on `map`**
+> When using `async.map` method, you may want to obtain an array of promises
+> rather than resolving them sequentially. 
+> To this purpose, `async.map` method can be given an additional argument,
+> specifying whether or not the promises returned should be resolved.
+> ```javascript
+> const promises = await arr.async.map(id => db.get({id}), false)
+>
+> // Promises can now be resolved in parallel
+> const items = await Promise.all(promises)
+> ```
 ## Own methods
 The following methods are not derived from `Array.prototype` methods and provide additional
 functionalities, always in the same async flavor.
 ### `splitToChunks`
-Splits the `AsyncArray` object into `AsyncArray`'s of the desired size
+Splits the `AsyncArray` object into `AsyncArray`'s of the size passed to its parameter. The last chunk may have a shorter size.
 ```javascript
-const whole = new AsyncArray(6).fill(0)
+const whole = new AsyncArray(1, 2, 3, 4, 5, 6, 7)
 const split = await whole.async.splitToCunks(2)
 
-console.log(split)
-// prints -> [[0, 0], [0, 0], [0, 0]]
+console.log(split.length)
+// prints -> 4
+
+console.log(split[0])
+// prints -> AsyncArray(2) [1, 2]
+
+console.log(split[1])
+// prints -> AsyncArray(2) [3, 4]
+
+console.log(split[2])
+// prints -> AsyncArray(2) [5, 6]
+
+console.log(split[3])
+// prints -> AsyncArray(2) [7]
 ```
 
 ## Info

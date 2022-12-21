@@ -1,4 +1,5 @@
 type Callback<T, R> = (element: T, index: number, array: T[]) => R 
+type ReduceCallback<T, R> = (accumulator: Awaited<R>, current: T, index: number, array: T[]) => R | Promise<R>
 
 export interface AsyncArray<T> {
     concat(...items: (T | ConcatArray<T>)[]): AsyncArray<T>
@@ -51,7 +52,7 @@ class Async<T> {
         })
     }
 
-    public filter(callback: Callback<T, boolean>) {
+    public filter(callback: Callback<T, boolean | Promise<boolean>>) {
         const array = this.#array
         const length = array.length
         const filtered = new AsyncArray<T>()
@@ -91,7 +92,7 @@ class Async<T> {
         })
     }
 
-    public find(callback: Callback<T, boolean>) {
+    public find(callback: Callback<T, boolean | Promise<boolean>>) {
         const array = this.#array
         const length = array.length
 
@@ -112,7 +113,7 @@ class Async<T> {
         })
     }
 
-    public findIndex(callback: Callback<T, boolean>) {
+    public findIndex(callback: Callback<T, boolean | Promise<boolean>>) {
         const array = this.#array
         const length = array.length
 
@@ -133,7 +134,7 @@ class Async<T> {
         })
     }
 
-    public findLast(callback: Callback<T, boolean>) {
+    public findLast(callback: Callback<T, boolean | Promise<boolean>>) {
         const array = this.#array
         const length = array.length
 
@@ -154,7 +155,7 @@ class Async<T> {
         })
     }
 
-    public findLastIndex(callback: Callback<T, boolean>) {
+    public findLastIndex(callback: Callback<T, boolean | Promise<boolean>>) {
         const array = this.#array
         const length = array.length
 
@@ -175,7 +176,7 @@ class Async<T> {
         })
     }
 
-    public forEach(callback: Callback<T, any>) {
+    public forEach(callback: Callback<T, any>, awaitCallback = true) {
         const array = this.#array
         const length = array.length
 
@@ -184,7 +185,10 @@ class Async<T> {
                 if (i === length)
                     return resolve()
 
-                await callback(array[i], i, array)
+                if (awaitCallback)
+                    await callback(array[i], i, array)
+                else    
+                    callback(array[i], i, array)    
 
                 setImmediate(iterate, ++i)
             }
@@ -275,7 +279,7 @@ class Async<T> {
         B extends boolean,
         U extends B extends true ? AsyncArray<Awaited<S>> : AsyncArray<S>
     >
-    (callback: Callback<T, S>, resolve: B): Promise<U>
+    (callback: Callback<T, S>, awaitCallback: B): Promise<U>
     public map(callback: Callback<T, unknown>, _await = true) {
         const array = this.#array    
         const length = array.length
@@ -302,9 +306,9 @@ class Async<T> {
         })
     }
 
-    public reduce(callback: (accumulator: T, current: T, index: number, array: T[]) => T): Promise<T>
-    public reduce<U>(callback: (accumulator: U, current: T, index: number, array: T[]) => U, initialValue: U): Promise<U>
-    public reduce<U>(callback: (acc: T | U, curr: T, i: number, arr: T[]) => U | Promise<U>, initialValue?: U) {
+    public reduce<U = T>(callback: ReduceCallback<T, U>): Promise<U>
+    public reduce<U>(callback: ReduceCallback<T, U>, initialValue: U): Promise<U>
+    public reduce<U>(callback: ReduceCallback<T, any>, initialValue?: U) {
         const array = this.#array    
         const length = array.length
 
@@ -340,9 +344,9 @@ class Async<T> {
         })
     }
 
-    public reduceRight(callback: (accumulator: T, current: T, index: number, array: T[]) => T): Promise<T>
-    public reduceRight<U>(callback: (accumulator: U, current: T, index: number, array: T[]) => U, initialValue: U): Promise<U>
-    public reduceRight<U>(callback: (acc: T | U, curr: T, i: number, arr: T[]) => U | Promise<U>, initialValue?: U) {
+    public reduceRight(callback: ReduceCallback<T, T>): Promise<T>
+    public reduceRight<U>(callback: ReduceCallback<T, U>, initialValue: U): Promise<U>
+    public reduceRight<U>(callback: ReduceCallback<T, any>, initialValue?: U) {
         const array = this.#array    
         const length = array.length
 
