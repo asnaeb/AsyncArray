@@ -1,7 +1,7 @@
 # AsyncArray
-[![npm](https://img.shields.io/badge/npm-1.5.1-blueviolet?style=flat-square)](https://www.npmjs.com/package/@asn.aeb/async-array)
-![deps](https://img.shields.io/badge/dependencies-none-brightgreen?style=flat-square)
-![license](https://img.shields.io/badge/license-GPL-blue?style=flat-square)
+[![npm](https://img.shields.io/badge/npm-1.5.2-blueviolet?style=flat)](https://www.npmjs.com/package/@asn.aeb/async-array)
+![deps](https://img.shields.io/badge/dependencies-none-brightgreen?style=flat)
+![license](https://img.shields.io/badge/license-GPL-blue?style=flat)
 ## Arrays with async capabilities
 `Array` class extension that uses `setImmediate` on iterative methods 
 so that the event loop won't be stuck until the end of the iteration. 
