@@ -1,6 +1,6 @@
 {
   "name": "@asn.aeb/async-array",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Array class with non blocking async methods and await support",
   "main": "index.js",
   "files": [
