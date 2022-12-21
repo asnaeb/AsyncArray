@@ -1,77 +1,176 @@
 # AsyncArray
-Array class with non-blocking methods and async/await support.
-It provides the same functionality as native Arrays, using `setImmediate` on each iteration. The event loop won't be stuck until
-the end of the full array computation with these methods but this comes at the cost of speed
-so use it when speed is not a priority and **not blocking** the event loop **is**.
+## Arrays with async capabilities
+`Array` class extension that uses `setImmediate` on iterative methods 
+so that the event loop won't be stuck until the end of the iteration. 
+Additionally, async callbacks can be used on every instance method that 
+takes a callback as an argument.
+
+Keep in mind that async methods are slower than native ones so use it when 
+speed **is not** a priority and not blocking the event loop **is**.
 ## Installation
 ```
 npm i @asn.aeb/async-array
 ```
-
 ## Usage
 ```javascript
 import {AsyncArray} from '@asn.aeb/async-array'
 ```
-`AsyncArray`'s can derive form existing arrays using the static method `from`
- ```javascript
-const arr = AsyncArray.from([1, 2, 3])
-```
-Or be standalone
+An instance of `AsyncArray` can be constructed with normal class syntax
+and its constructor shared the same signature as `Array`'s constructor.
 ```javascript
-const arr = new AsyncArray()
+let arr
+
+arr = new AsyncArray()
+// -> AsyncArray(0) []
+
+arr = new AsyncArray(3) 
+// -> AsyncArray(3) [<empty>, <empty>, <empty>]
+
+arr = new AsyncArray(1, 2, 3) 
+// -> AsyncArray(3) [1, 2, 3]
 ```
-Standard array methods will be available under the `sync` property
+It works just like a normal array
 ```javascript
-arr.sync.push(1, 2, 3)
-```
-Items can be set and accessed using standard array syntax
-```javascript
-arr[3] = 4
-arr[3] // -> 4
-```
-Iteration with `for...of` can be done as usual
-```javascript
+arr.push(4, 5, 6)
+
+arr[6] = 7
+
 for (const item of arr) { /* .. */ }
 ```
-## Methods
-- ### forEach
-    ```javascript
-    await arr.forEach(item => /* .. */)
-    ```
-    Async callback example
+With one additional property on its prototype
+```javascript
+arr.async
+```
+Under this property, beside this library's own methods, you will find many methods 
+that have the same name as `Array.prototype` methods that you know. 
+They will provide exactly the same functionality with the difference 
+that they will run asynchronously, not blocking the Node.js event loop, 
+and will return a promise. These methods, where a callback must be supplied, 
+will accept a callback that returns a promise and execute it asynchronously as well. 
 
-    ```javascript
-    // Will log every second
-    await arr.forEach(async item => {
-        await new Promise(resolve => {
-            setTimeout(() => resolve(console.log(item)), 1000)
-        })
+## `AsyncArray.prototype.async`
+- `every`
+- `filter`
+- `fill`
+- `find`
+- `findIndex`
+- `findLast`
+- `findLastIndex`
+- `forEach`
+- `includes`
+- `indexOf`
+- `lastIndexOf`
+- `map`
+- `reduce`
+- `reduceRight`
+- `some`
+- **`splitToChunks`**
+
+## Derive from existing arrays
+You may find yourself wanting to use these methods on an existing `Array` object. 
+Maybe you fetched some data from somewhere - or got a computation result from 
+a library - in the form of an array 
+```javascript
+const myArray = ['normal', 'boring', 'array']
+```
+Async methods can be used on this object in two ways:
+### 1. Copy the array into a new `AsyncArray` object
+Using the `from` static method, `myArray` will be left untouched and a new object will be
+created in the form of an `AsyncArray` instance
+```javascript
+const myAsyncArray = AsyncArray.from(myArray)
+
+myAsyncArray[0] = 'async'
+myAsyncArray[1] = 'fun'
+
+console.log(myArray)
+// prints -> AsyncArray(3) ['normal', 'boring', 'array']
+
+console.log(myAsyncArray)
+// prints -> AsyncArray(3) ['async', 'fun', 'array']
+
+console.log(myArray === myAsyncArray)
+// prints -> false
+
+console.log(myArray instanceof AsyncArray)
+// prints -> false
+```
+Here, `myAsyncArray` and `myArray` will reference two different objects.
+### 2. Transform the `Array` to an `AsyncArray`
+Copying over a very large array to a new object can take a while and can be often unnecessary, 
+remember we are here to avoid *blocking*. You can transform an array-like object to an `AsyncArray`
+by using the `to` static method. Let's repeat the previous example
+```javascript
+const myAsyncArray = AsyncArray.to(myArray)
+
+myAsyncArray[0] = 'async'
+myAsyncArray[1] = 'fun'
+
+console.log(myArray)
+// prints -> AsyncArray(3) ['async', 'fun', 'array']
+
+console.log(myAsyncArray)
+// prints -> AsyncArray(3) ['async', 'fun', 'array']
+
+console.log(myArray === myAsyncArray)
+// prints -> true
+
+console.log(myArray instanceof AsyncArray)
+// prints -> true
+```
+As you can see, `myArray` has not been duplicated. It has just been transformed to an
+`AsyncArray` instance and variable `myAsyncArray` now just references that object. 
+
+> #### **Typescript users note**
+> If you are looking carefully, you will notice the above example could have been written
+> as follows
+> ```javascript
+> AsyncArray.to(myArray)
+> 
+> myArray[0] = 'async'
+> myArray[1] = 'fun'
+> 
+> console.log(myArray instanceof AsyncArray) // -> true
+> ```
+> While this is generally okay, it is always better to assign the transformed object
+> to a new identifier when using Typescript so that you can have the correct type on it. Otherwise, you will incurr in problems with typings.
+
+## Usage Examples
+Log an item every second
+```javascript
+const myArray = new AsyncArray(1, 2, 3)
+
+myArray.async.forEach(async item => {
+    await new Promise(resolve => {
+        setTimeout(() => resolve(console.log(item)), 1000)
     })
-    ```
-- ### map
-    ```javascript
-    const mapped = await arr.map(item => /* .. */)
-    ```
-    Async callback example
+})
+```
+Query a database with key-schema `{id: number}` from an array of numbers and retrieve
+the result into a new array
+```javascript
+const db = myDbClient()
+const keys = new AsyncArray(1, 2, 3)
+const items = await arr.async.map(async id => await db.get({id}))
+```
+## Own methods
+The following methods are not derived from `Array.prototype` methods and provide additional
+functionalities, always in the same async flavor.
+### `splitToChunks`
+Splits the `AsyncArray` object into `AsyncArray`'s of the desired size
+```javascript
+const whole = new AsyncArray(6).fill(0)
+const split = await whole.async.splitToCunks(2)
 
-    ```javascript
-    // Assume a database that retrieves items with keys like {id: number}
-    const db = dBClient()
-    const items = await arr.map(async id => await db.get({id}))
-    ```
-- ### splitToChunks
-    Splits the `AsyncArray` object into `AsyncArray`'s of the desired size
-    ```javascript
-    const whole = AsyncArray.from(Array(6).fill(0))
-    const split = await whole.splitToCunks(2)
-    chunked // -> [[0, 0], [0, 0], [0, 0]]
-    ```
+console.log(split)
+// prints -> [[0, 0], [0, 0], [0, 0]]
+```
 
 ## Info
 This library is under development. More methods are planned to be added in the future and
 some work is scheduled to investigate how the speed can be improved. 
 While it can be useful, keep in mind that this is not complete and its api is heavily subject to changes.
-Contribution and suggestions on GitHub are really appreciated. 
+Contribution / suggestions / feedback on GitHub are really appreciated. 
 
 
 
