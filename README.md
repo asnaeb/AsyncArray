@@ -64,7 +64,7 @@ await arr.async.some(item => item > 10)
 // -> false
 
 await arr.async.map(item => item * 10) 
-// -> AsyncArray(6) [10, 20, 30, 40, 50, 60, 70]
+// -> AsyncArray(7) [10, 20, 30, 40, 50, 60, 70]
 ```
 
 ## `AsyncArray.prototype.async`
