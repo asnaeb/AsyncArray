@@ -174,7 +174,7 @@ const keys = new AsyncArray(1, 2, 3)
 
 const db = myDbClient() // <- Hypotetical database client
 
-// Assume db.get() returns a promise that resolved to the actual item
+// Assume db.get() returns a promise that resolves to the actual item
 const items = await arr.async.map(id => db.get({id}))
 ```
 > #### **Note on `map`**
