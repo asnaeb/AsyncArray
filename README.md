@@ -1,4 +1,7 @@
 # AsyncArray
+[![npm](https://img.shields.io/badge/npm-1.5.1-blueviolet?style=flat-square)](https://www.npmjs.com/package/@asn.aeb/async-array)
+![deps](https://img.shields.io/badge/dependencies-none-brightgreen?style=flat-square)
+![license](https://img.shields.io/badge/license-GPL-blue?style=flat-square)
 ## Arrays with async capabilities
 `Array` class extension that uses `setImmediate` on iterative methods 
 so that the event loop won't be stuck until the end of the iteration. 
@@ -16,7 +19,7 @@ npm i @asn.aeb/async-array
 import {AsyncArray} from '@asn.aeb/async-array'
 ```
 An instance of `AsyncArray` can be constructed with normal class syntax
-and its constructor shared the same signature as `Array`'s constructor.
+and its constructor shares the same signature as `Array`'s constructor.
 ```javascript
 let arr
 
