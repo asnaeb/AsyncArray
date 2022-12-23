@@ -103,7 +103,7 @@ myAsyncArray[0] = 'async'
 myAsyncArray[1] = 'fun'
 
 console.log(myArray)
-// prints -> AsyncArray(3) ['normal', 'boring', 'array']
+// prints -> (3) ['normal', 'boring', 'array']
 
 console.log(myAsyncArray)
 // prints -> AsyncArray(3) ['async', 'fun', 'array']
