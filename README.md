@@ -1,5 +1,5 @@
 # AsyncArray
-[![npm](https://img.shields.io/badge/npm-1.5.5-blueviolet?style=flat)](https://www.npmjs.com/package/@asn.aeb/async-array)
+[![npm](https://img.shields.io/badge/npm-1.5.6-blueviolet?style=flat)](https://www.npmjs.com/package/@asn.aeb/async-array)
 ![deps](https://img.shields.io/badge/dependencies-none-brightgreen?style=flat)
 ![license](https://img.shields.io/badge/license-GPL-blue?style=flat)
 ## Arrays with async capabilities
@@ -9,7 +9,7 @@ Additionally, async callbacks can be used on every instance method that
 takes a callback as an argument.
 
 Keep in mind that async methods are slower than native ones so use it when 
-speed **is not** a priority and not blocking the event loop **is**.
+speed **is not** a priority while not blocking the event loop **is**.
 ## Installation
 ```
 npm i @asn.aeb/async-array
@@ -138,7 +138,9 @@ console.log(myArray instanceof AsyncArray)
 // prints -> true
 ```
 As you can see, `myArray` has not been duplicated. It has just been transformed to an
-`AsyncArray` instance and variable `myAsyncArray` now just references that object. 
+`AsyncArray` instance and variable `myAsyncArray` now just references that object. Note that this 
+will not mutate your array which will still be assignable to whatever it was before. All this 
+will do is adding `async` with its methods to the object properties.
 
 > #### **Typescript users note**
 > If you are looking carefully, you will notice the above example could have been written
@@ -218,6 +220,16 @@ This library is under development. More methods are planned to be added in the f
 some work is scheduled to investigate how the speed can be improved. 
 While it can be useful, keep in mind that this is not complete and its api is heavily subject to changes.
 Contribution / suggestions / feedback on GitHub are really appreciated. 
+
+## Typescript known issues
+Due to typescript issue [#51993](https://github.com/microsoft/TypeScript/issues/51993), when using `AsyncArray` with `Promise.all` or `Promise.allSettled`, object must be cast to a normal array
+or typings will be broken
+```typescript
+const promiseArray = new AsyncArray(Promise.resolve(0), Promise.resolve(1))
+
+Promise.all(promiseArray as Promise<number>[])
+Promise.allSettled(romiseArray as Promise<number>[])
+```
 
 
 

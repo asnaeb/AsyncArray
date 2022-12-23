@@ -35,6 +35,8 @@ jspm_packages/
 # Built files
 index.js
 index.d.ts
+async.js
+async.d.ts
 
 # macOS files
 .DS_Store

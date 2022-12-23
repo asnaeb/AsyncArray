@@ -9,5 +9,5 @@
         "noImplicitOverride": true
     },
     "include": ["src"],
-    "exclude": ["tests"]
+    "exclude": []
 }
