@@ -1,8 +1,9 @@
 import {Server} from 'node:http'
 import {AsyncArray} from '../index.js'
 
-const myArray = new AsyncArray(1, 2, 3)
+const arr: string[] | number[] | ['x', 'y'] = []
 
-myArray.async.forEach(item => new Promise(resolve => {
-    setTimeout(() => resolve(console.log(item)), 1000)
-}))
+const as = AsyncArray.to(arr)
+
+
+// TODO TESTS

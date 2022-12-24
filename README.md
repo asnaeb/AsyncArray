@@ -1,5 +1,5 @@
 # AsyncArray
-[![npm](https://img.shields.io/badge/npm-1.5.7-blueviolet?style=flat)](https://www.npmjs.com/package/@asn.aeb/async-array)
+[![npm](https://img.shields.io/badge/npm-1.5.8-blueviolet?style=flat)](https://www.npmjs.com/package/@asn.aeb/async-array)
 ![deps](https://img.shields.io/badge/dependencies-none-brightgreen?style=flat)
 ![license](https://img.shields.io/badge/license-GPL-blue?style=flat)
 ## Arrays with async capabilities
@@ -183,7 +183,7 @@ const items = await arr.async.map(id => db.get({id}))
 > When using `async.map` method, you may want to obtain an array of promises
 > rather than resolving them sequentially. 
 > To this purpose, `async.map` method can be given an additional argument,
-> specifying whether or not the promises returned should be resolved.
+> specifying whether or not the promises returned should be resolved. Defaults to `true` if omitted
 > ```javascript
 > const promises = await arr.async.map(id => db.get({id}), false)
 >

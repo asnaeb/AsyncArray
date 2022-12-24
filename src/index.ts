@@ -34,7 +34,12 @@ export class AsyncArray<T> extends Array<T> {
     public static override from:
     <T, U = T>(iterable: ArrayLike<T> | Iterable<T>, mapfn?: (k: T, i: number) => U, thisArg?: any) => AsyncArray<U>
 
-    public static to<T, U extends T>(array: ArrayLike<T> | Iterable<T>): AsyncArray<U> {
+    public static to
+    <
+        T extends ArrayLike<unknown> | Iterable<unknown>,
+        U = T extends (ArrayLike<infer S> | Iterable<infer S>) ? S : never
+    >
+    (array: T): AsyncArray<U> {
         if (array instanceof AsyncArray)
             return array
 
