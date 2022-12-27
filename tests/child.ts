@@ -5,4 +5,4 @@ export type PrimaryKeys<T extends {}> = T[] | [PrimaryKeyObject] | string[] | nu
 
 declare const keys: PrimaryKeys<{a: 0}>
 
-AsyncArray.to(keys).forEach(i => i)
+AsyncArray.to(keys).async.forEach(i => i)

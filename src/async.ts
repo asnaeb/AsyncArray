@@ -248,32 +248,28 @@ export class Async<T> {
         })
     }
 
-    public map<S>(callback: Callback<T, S>): Promise<AsyncArray<Awaited<S>>>
-    public map
-    <
-        S, 
+    public map<
+        S,
         B extends boolean,
-        U extends B extends true ? AsyncArray<Awaited<S>> : AsyncArray<S>
-    >
-    (callback: Callback<T, S>, awaitCallback: B): Promise<U>
-    public map(callback: Callback<T, unknown>, _await = true) {
+        U extends [B] extends [false] ? S : Awaited<S>
+    >(callback: Callback<T, S>, _await?: B) {
         const array = this.#array    
         const length = array.length
-        const map = new AsyncArray()
+        const map = new AsyncArray<U>()
 
-        return new Promise<AsyncArray<unknown>>(resolve => {
+        return new Promise<AsyncArray<U>>(resolve => {
             const iterate = async (i = 0) => {
                 if (i === length)
                     return resolve(map)
     
                 let mapped
 
-                if (_await)
+                if (_await || _await === undefined)
                     mapped = await callback(array[i], i, array) 
                 else 
                     mapped = callback(array[i], i, array) 
 
-                map.push(mapped)
+                map.push(mapped as unknown as U)
     
                 setImmediate(iterate, ++i)
             }
@@ -284,12 +280,12 @@ export class Async<T> {
 
     public reduce<U = T>(callback: ReduceCallback<T, U>): Promise<U>
     public reduce<U>(callback: ReduceCallback<T, U>, initialValue: U): Promise<U>
-    public reduce<U>(callback: ReduceCallback<T, any>, initialValue?: U) {
+    public reduce<U>(callback: ReduceCallback<T, unknown>, initialValue?: U) {
         const array = this.#array    
         const length = array.length
 
-        return new Promise<U>((resolve, reject) => { 
-            let start: number, accumulator: T | U
+        return new Promise<unknown>((resolve, reject) => { 
+            let start: number, accumulator: unknown
 
             if (initialValue !== undefined) {
                 start = 0
